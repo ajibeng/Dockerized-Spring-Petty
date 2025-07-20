@@ -6,23 +6,39 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 335871625378.dkr.ecr.eu-west-2.amazonaws.com
-      - REPOSITORY_URI=335871625378.dkr.ecr.eu-west-2.amazonaws.com/petty-petty
+      - REPOSITORY_URI=335871625378.dkr.ecr.eu-west-2.amazonaws.com/karo-march-repo
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${CODEBUILD_BUILD_NUMBER:=latest}
+
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing the Docker image to ECR...
+      - echo Pushing Docker image to ECR...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
+
+      - echo Cloning ArgoCD manifest repo...
+      - git config --global user.email "ooghenekaro@yahoo.com"
+      - git config --global user.name "ooghenekaro"
+      - git clone https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_USERNAME}/argocd-manifest.git
+      - cd argocd-manifest
+
+      - echo Updating deployment.yml...
+      - 'sed -i "s+image: ${REPOSITORY_URI}:.*+image: ${REPOSITORY_URI}:${IMAGE_TAG}+g" deployment.yml'
+      - cat deployment.yml
+
+      - git add deployment.yml
+      - git commit -m "Update image tag to ${IMAGE_TAG} from CodeBuild"
+      - git push origin main
+
 artifacts:
   files:
     - '**/*'
   discard-paths: yes
-  
