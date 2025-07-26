@@ -3,7 +3,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo Logging in to Amazon ECR....
       - aws --version
       - aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 335871625378.dkr.ecr.eu-west-2.amazonaws.com
       - REPOSITORY_URI=335871625378.dkr.ecr.eu-west-2.amazonaws.com/petty-petty
