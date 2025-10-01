@@ -7,7 +7,7 @@ phases:
       - aws --version
       - aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 585008086702.dkr.ecr.eu-west-1.amazonaws.com
       - REPOSITORY_URI=585008086702.dkr.ecr.eu-west-1.amazonaws.com/springpet
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
       - IMAGE_TAG=${CODEBUILD_BUILD_NUMBER:=latest}
 
   build:
